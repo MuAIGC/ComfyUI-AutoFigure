@@ -4,6 +4,10 @@
 
 # AutoFigure-edit: Generating and Editing Publication-Ready Scientific Illustrations [ICLR 2026]
 
+<p align="center">
+  <a href="README.md">English</a> | <a href="README_zh.md">中文</a>
+</p>
+
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-blue?style=for-the-badge&logo=openreview)](https://openreview.net/forum?id=5N3z9JQJKq)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -11,7 +15,7 @@
 
 <p align="center">
   <strong>From Method Text to Editable SVG</strong><br>
-  AutoFigure-edit is the next version of AutoFigure. It turns paper method sections into editable SVG figures and lets you refine them in an embedded SVG editor.
+  AutoFigure-edit is the next version of AutoFigure. It turns paper method sections into fully editable SVG figures and lets you refine them in an embedded SVG editor.
 </p>
 
 [Quick Start](#-quick-start) • [Web Interface](#-web-interface) • [How It Works](#-how-it-works) • [Configuration](#-configuration) • [Citation](#-citation--license)
@@ -37,9 +41,48 @@
 
 ---
 
+## 🎨 Gallery: Editable Vectorization & Style Transfer
+
+AutoFigure-edit introduces two breakthrough capabilities:
+
+1.  **Fully Editable SVGs (Pure Code Implementation):** Unlike raster images, our outputs are structured Vector Graphics (SVG). Every component is editable—text, shapes, and layout can be modified losslessly.
+2.  **Style Transfer:** The system can mimic the artistic style of reference images provided by the user.
+
+Below are **9 examples** covering 3 different papers. Each paper is generated using 3 different reference styles.
+*(Each image shows: **Left** = AutoFigure Generation | **Right** = Vectorized Editable SVG)*
+
+| Paper & Style Transfer Demonstration |
+| :---: |
+| **[CycleResearcher](https://github.com/zhu-minjun/Researcher) / [Style 1](https://arxiv.org/pdf/2510.09558)**<br><img src="img/case/4.png" width="100%" alt="Paper 1 Style 1"/> |
+| **[CycleResearcher](https://github.com/zhu-minjun/Researcher) / [Style 2](https://arxiv.org/pdf/2503.18102)**<br><img src="img/case/5.png" width="100%" alt="Paper 1 Style 2"/> |
+| **[CycleResearcher](https://github.com/zhu-minjun/Researcher) / [Style 3](https://arxiv.org/pdf/2510.14512)**<br><img src="img/case/6.png" width="100%" alt="Paper 1 Style 3"/> |
+| **[DeepReviewer](https://github.com/zhu-minjun/Researcher) / [Style 1](https://arxiv.org/pdf/2510.09558)**<br><img src="img/case/7.png" width="100%" alt="Paper 2 Style 1"/> |
+| **[DeepReviewer](https://github.com/zhu-minjun/Researcher) / [Style 2](https://arxiv.org/pdf/2503.18102)**<br><img src="img/case/8.png" width="100%" alt="Paper 2 Style 2"/> |
+| **[DeepReviewer](https://github.com/zhu-minjun/Researcher) / [Style 3](https://arxiv.org/pdf/2510.14512)**<br><img src="img/case/9.png" width="100%" alt="Paper 2 Style 3"/> |
+| **[DeepScientist](https://github.com/ResearAI/DeepScientist) / [Style 1](https://arxiv.org/pdf/2510.09558)**<br><img src="img/case/10.png" width="100%" alt="Paper 3 Style 1"/> |
+| **[DeepScientist](https://github.com/ResearAI/DeepScientist) / [Style 2](https://arxiv.org/pdf/2503.18102)**<br><img src="img/case/11.png" width="100%" alt="Paper 3 Style 2"/> |
+| **[DeepScientist](https://github.com/ResearAI/DeepScientist) / [Style 3](https://arxiv.org/pdf/2510.14512)**<br><img src="img/case/12.png" width="100%" alt="Paper 3 Style 3"/> |
+
+---
 ## 🚀 How It Works
 
-AutoFigure-edit follows the exact pipeline implemented in `autofigure2.py`.
+The AutoFigure-edit pipeline transforms a raw generation into an editable SVG in four distinct stages:
+
+<div align="center">
+  <img src="img/pipeline.png" width="100%" alt="Pipeline Visualization: Figure -> SAM -> Template -> Final"/>
+  <br>
+  <em>(1) Raw Generation &to; (2) SAM3 Segmentation &to; (3) SVG Layout Template &to; (4) Final Assembled Vector</em>
+</div>
+
+<br>
+
+1.  **Generation (`figure.png`):** The LLM generates a raster draft based on the method text.
+2.  **Segmentation (`sam.png`):** SAM3 detects and segments distinct icons and text regions.
+3.  **Templating (`template.svg`):** The system constructs a structural SVG wireframe using placeholders.
+4.  **Assembly (`final.svg`):** High-quality cropped icons and vectorized text are injected into the template.
+
+<details>
+<summary><strong>View Detailed Technical Flowchart</strong></summary>
 
 ```mermaid
 flowchart LR
@@ -60,9 +103,10 @@ flowchart LR
     M --> N[final.svg]
 ```
 
-Key details:
-- Placeholder mode controls how icon boxes are encoded (`label`, `box`, or `none`).
-- `optimize_iterations=0` skips the optimization step and uses `template.svg` directly.
+**Key configuration details:**
+- **Placeholder Mode:** Controls how icon boxes are encoded in the prompt (`label`, `box`, or `none`).
+- **Optimization:** `optimize_iterations=0` allows skipping the refinement step to use the raw structure directly.
+</details>
 
 ---
 
@@ -97,6 +141,27 @@ python server.py
 ```
 
 Then open `http://localhost:8000`.
+
+---
+
+## 🖥️ Web Interface Demo
+
+AutoFigure-edit provides a visual web interface designed for seamless generation and editing.
+
+### 1. Configuration Page
+<img src="img/demo_start.png" width="100%" alt="Configuration Page" style="border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;"/>
+
+On the start page, paste your paper's method text on the left. On the right, configure your generation settings:
+*   **Provider:** Select your LLM provider (OpenRouter or Bianxie).
+*   **Optimize:** Set SVG template refinement iterations (recommend `0` for standard use).
+*   **Reference Image:** Upload a target image to enable style transfer.
+
+### 2. Canvas & Editor
+<img src="img/demo_canvas.png" width="100%" alt="Canvas Page" style="border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;"/>
+
+The generation result loads directly into an integrated [SVG-Edit](https://github.com/SVG-Edit/svgedit) canvas, allowing for full vector editing.
+*   **Status & Logs:** Check real-time progress (top-left) and view detailed execution logs (top-right button).
+*   **Artifacts Drawer:** Click the floating button (bottom-right) to expand the **Artifacts Panel**. This contains all intermediate outputs (icons, SVG templates, etc.). You can **drag and drop** any artifact directly onto the canvas for custom composition.
 
 ---
 
@@ -157,7 +222,7 @@ AutoFigure-edit/
 ## 🤝 Community & Support
 
 **WeChat Discussion Group**  
-Scan the QR code to join our community. If the code is expired, please contact `tuchuan@mail.hfut.edu.cn`.
+Scan the QR code to join our community. If the code is expired, please add WeChat ID `nauhcutnil` or contact `tuchuan@mail.hfut.edu.cn`.
 
 <img src="img/wechat.jpg" width="200" alt="WeChat QR Code"/>
 
@@ -165,14 +230,23 @@ Scan the QR code to join our community. If the code is expired, please contact `
 
 ## 📜 Citation & License
 
-If you use AutoFigure-edit in academic work, please cite this repository and the original AutoFigure project.
+If you find **AutoFigure** or **FigureBench** helpful, please cite:
 
 ```bibtex
-@software{autofigure_edit2026,
-  title = {AutoFigure-edit: Generating and Editing Publication-Ready Scientific Illustrations},
-  author = {AutoFigure-edit contributors},
-  year = {2026},
-  url = {https://github.com/your-org/AutoFigure-edit}
+@inproceedings{
+zhu2026autofigure,
+title={AutoFigure: Generating and Refining Publication-Ready Scientific Illustrations},
+author={Minjun Zhu and Zhen Lin and Yixuan Weng and Panzhong Lu and Qiujie Xie and Yifan Wei and Yifan_Wei and Sifan Liu and QiYao Sun and Yue Zhang},
+booktitle={The Fourteenth International Conference on Learning Representations},
+year={2026},
+url={https://openreview.net/forum?id=5N3z9JQJKq}
+}
+
+@dataset{figurebench2025,
+  title = {FigureBench: A Benchmark for Automated Scientific Illustration Generation},
+  author = {WestlakeNLP},
+  year = {2025},
+  url = {https://huggingface.co/datasets/WestlakeNLP/FigureBench}
 }
 ```
 
