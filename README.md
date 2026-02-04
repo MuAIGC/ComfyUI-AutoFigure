@@ -71,7 +71,7 @@ The AutoFigure-edit pipeline transforms a raw generation into an editable SVG in
 <div align="center">
   <img src="img/pipeline.png" width="100%" alt="Pipeline Visualization: Figure -> SAM -> Template -> Final"/>
   <br>
-  <em>(1) Raw Generation &to; (2) SAM3 Segmentation &to; (3) SVG Layout Template &to; (4) Final Assembled Vector</em>
+  <em>(1) Raw Generation &rarr; (2) SAM3 Segmentation &rarr; (3) SVG Layout Template &rarr; (4) Final Assembled Vector</em>
 </div>
 
 <br>
@@ -82,26 +82,18 @@ The AutoFigure-edit pipeline transforms a raw generation into an editable SVG in
 4.  **Assembly (`final.svg`):** High-quality cropped icons and vectorized text are injected into the template.
 
 <details>
-<summary><strong>View Detailed Technical Flowchart</strong></summary>
+<summary><strong>View Detailed Technical Pipeline</strong></summary>
 
-```mermaid
-flowchart LR
-    A[Method text] --> B[LLM image generation]
-    B --> C[figure.png]
-    C --> D[SAM3 segmentation\nmulti-prompt + merge]
-    D --> E[samed.png + boxlib.json]
-    E --> F[Crop + RMBG-2.0]
-    F --> G[icons/*.png + *_nobg.png]
-    C --> H[LLM SVG template generation\nuses figure + samed + boxlib]
-    E --> H
-    H --> I[template.svg]
-    I --> J[LLM SVG optimization\noptional]
-    J --> K[optimized_template.svg]
-    K --> L[Coordinate alignment]
-    G --> M[Icon replacement]
-    L --> M
-    M --> N[final.svg]
-```
+<br>
+<div align="center">
+  <img src="img/edit_method.png" width="100%" alt="AutoFigure-edit Technical Pipeline"/>
+</div>
+
+AutoFigure2’s pipeline starts from the paper’s method text and first calls a **text‑to‑image LLM** to render a journal‑style schematic, saved as `figure.png`. The system then runs **SAM3 segmentation** on that image using one or more text prompts (e.g., “icon, diagram, arrow”), merges overlapping detections by an IoU‑like threshold, and draws gray‑filled, black‑outlined labeled boxes on the original; this produces both `samed.png` (the labeled mask overlay) and a structured `boxlib.json` with coordinates, scores, and prompt sources.
+
+Next, each box is cropped from the original figure and passed through **RMBG‑2.0** for background removal, yielding transparent icon assets under `icons/*.png` and `*_nobg.png`. With `figure.png`, `samed.png`, and `boxlib.json` as multimodal inputs, the LLM generates a **placeholder‑style SVG** (`template.svg`) whose boxes match the labeled regions.
+
+Optionally, the SVG is iteratively refined by an **LLM optimizer** to better align strokes, layouts, and styles, resulting in `optimized_template.svg` (or the original template if optimization is skipped). The system then compares the SVG dimensions with the original figure to compute scale factors and aligns coordinate systems. Finally, it replaces each placeholder in the SVG with the corresponding transparent icon (matched by label/ID), producing the assembled `final.svg`.
 
 **Key configuration details:**
 - **Placeholder Mode:** Controls how icon boxes are encoded in the prompt (`label`, `box`, or `none`).

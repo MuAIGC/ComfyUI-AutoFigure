@@ -70,7 +70,7 @@ AutoFigure-edit 的处理流程通过四个阶段将原始生成的位图转化�
 <div align="center">
   <img src="img/pipeline.png" width="100%" alt="流程可视化: Figure -> SAM -> Template -> Final"/>
   <br>
-  <em>(1) 原始生成 &to; (2) SAM3 分割 &to; (3) SVG 布局模板 &to; (4) 最终矢量合成</em>
+  <em>(1) 原始生成 &rarr; (2) SAM3 分割 &rarr; (3) SVG 布局模板 &rarr; (4) 最终矢量合成</em>
 </div>
 
 <br>
@@ -81,26 +81,18 @@ AutoFigure-edit 的处理流程通过四个阶段将原始生成的位图转化�
 4.  **合成 (`final.svg`):** 将高质量的抠图图标和矢量化文本注入模板，完成组装。
 
 <details>
-<summary><strong>点击查看详细技术流程图</strong></summary>
+<summary><strong>点击查看技术流程详解</strong></summary>
 
-```mermaid
-flowchart LR
-    A[Method text] --> B[LLM image generation]
-    B --> C[figure.png]
-    C --> D[SAM3 segmentation\nmulti-prompt + merge]
-    D --> E[samed.png + boxlib.json]
-    E --> F[Crop + RMBG-2.0]
-    F --> G[icons/*.png + *_nobg.png]
-    C --> H[LLM SVG template generation\nuses figure + samed + boxlib]
-    E --> H
-    H --> I[template.svg]
-    I --> J[LLM SVG optimization\noptional]
-    J --> K[optimized_template.svg]
-    K --> L[Coordinate alignment]
-    G --> M[Icon replacement]
-    L --> M
-    M --> N[final.svg]
-```
+<br>
+<div align="center">
+  <img src="img/edit_method.png" width="100%" alt="AutoFigure-edit 技术流程"/>
+</div>
+
+AutoFigure2 的流程始于论文的方法文本，首先调用 **文本生成图像 LLM (Text-to-Image LLM)** 渲染出期刊风格的示意图，保存为 `figure.png`。接着，系统使用一个或多个文本提示词（如 "icon, diagram, arrow"）对该图像运行 **SAM3 分割**，通过 IoU 阈值合并重叠的检测结果，并在原图上绘制灰底黑边的带标签框；这一步生成了 `samed.png`（带标签的掩码层）和一个包含坐标、置信度和提示词来源的结构化文件 `boxlib.json`。
+
+随后，每个方框区域从原图中裁剪出来，并经过 **RMBG-2.0** 进行背景去除，生成位于 `icons/*.png` 和 `*_nobg.png` 的透明图标素材。系统将 `figure.png`、`samed.png` 和 `boxlib.json` 作为多模态输入，由 LLM 生成一个**占位符风格的 SVG** (`template.svg`)，其方框与标记区域相匹配。
+
+此外，SVG 可以选择性地通过 **LLM 优化器** 进行迭代微调，以更好地对齐线条、布局和风格，生成 `optimized_template.svg`（若跳过优化则使用原始模板）。系统随后比较 SVG 与原始图像的尺寸以计算缩放因子并对齐坐标系。最后，它将 SVG 中的每个占位符替换为对应的透明图标（通过标签/ID 匹配），从而组装出最终的 `final.svg`。
 
 **关键配置细节：**
 - **占位符模式 (Placeholder Mode):** 控制图标框在提示词中的编码方式（`label`、`box` 或 `none`）。
