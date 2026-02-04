@@ -2,7 +2,7 @@
 
 <img src="img/logo.png" alt="AutoFigure-edit Logo" width="100%"/>
 
-# AutoFigure-edit: Generating and Editing Publication-Ready Scientific Illustrations [ICLR 2026]
+# AutoFigure: Generating and Refining Publication-Ready Scientific Illustrations [ICLR 2026]
 
 <p align="center">
   <a href="README.md">English</a> | <a href="README_zh.md">中文</a>
