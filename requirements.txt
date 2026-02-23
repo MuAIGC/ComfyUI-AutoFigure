@@ -1,20 +1,14 @@
-# Core runtime
-fastapi>=0.110
-uvicorn>=0.24
-pydantic>=2.6
-python-multipart>=0.0.9
-requests>=2.31
-numpy>=1.26
-Pillow>=10.0
-transformers>=4.39
-openai>=1.0
+torch>=2.0.0
+numpy>=1.24.0
+Pillow>=10.0.0
+requests>=2.31.0
+lxml>=4.9.0
+cairosvg>=2.7.0
+svglib>=1.5.0
+transformers>=4.40.0
+easyocr>=1.7.0
+paddleocr>=2.7.0
 
-# ML stack (adjust to match your CUDA/PyTorch setup)
-torch>=2.1
-torchvision>=0.16
-
-# Optional: SVG validation/rendering helpers
-lxml>=4.9
-cairosvg>=2.7
-svglib>=1.5
-reportlab>=4.0
+# OpenAI SDK（用于 bianxie provider）
+openai>=1.30.0
+google-generativeai>=0.8.0  # 如使用 Gemini 直接调用
